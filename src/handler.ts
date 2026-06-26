@@ -10,34 +10,52 @@ import {
     Department,
 } from "./types";
 import { validateResponse } from "./validator";
-
 import { sanitizeResponse } from "./sanitizer";
 import { setCachedResponse, getCachedResponse, makeCacheKey } from "./cache";
-const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Load sample_feed.json once at startup
+const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+
+// Lazy client init
+let client: OpenAI | null = null;
+function getClient(): OpenAI {
+    if (!client) {
+        client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+        console.log("OpenAI client initialized with model:", MODEL);
+    }
+    return client;
+}
+
+// Sample feed cache
 let sampleFeed: any = [];
-(async () => {
+
+// Explicit loader function
+export async function loadSampleFeed(): Promise<void> {
     try {
-        const sampleFeedPath = path.join(__dirname, "../data/sample_feed.json");
+        const sampleFeedPath = path.resolve(process.cwd(), "data/sample_feed.json");
         const fileData = await readFile(sampleFeedPath, "utf-8");
         sampleFeed = JSON.parse(fileData);
+        console.log("Sample feed loaded successfully.");
     } catch (err) {
         console.error("Failed to load sample_feed.json:", err);
+        sampleFeed = []; // fallback to empty
     }
-})();
+}
 
 // Call OpenAI with strict JSON output
 async function callOpenAI(prompt: string): Promise<TicketResponse> {
-    const response = await client.chat.completions.create({
-        model: MODEL,
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-    });
+    try {
+        const response = await getClient().chat.completions.create({
+            model: MODEL,
+            messages: [{ role: "user", content: prompt }],
+            response_format: { type: "json_object" },
+        });
 
-    const raw = response.choices[0].message?.content || "{}";
-    return JSON.parse(raw) as TicketResponse;
+        const raw = response.choices[0].message?.content || "{}";
+        return JSON.parse(raw) as TicketResponse;
+    } catch (err) {
+        console.error("OpenAI call failed:", err);
+        throw err;
+    }
 }
 
 // Build the full prompt for each request

@@ -1,11 +1,18 @@
-console.log("STARTTTT")
-import "dotenv/config";
 import express, { Request, Response, NextFunction } from "express";
-console.log(`\n\n\nbruh\n\n\n`, process.env.OPENAI_API_KEY)
-import { analyzeWithCache } from "./handler";
+import "dotenv/config";
+import { analyzeWithCache, loadSampleFeed } from "./handler";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+
+// Global error/rejection handlers
+process.on("unhandledRejection", (reason, promise) => {
+    console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+process.on("uncaughtException", (err) => {
+    console.error("Uncaught Exception:", err);
+});
+
 // Built-in JSON parser
 app.use(express.json());
 
@@ -17,7 +24,6 @@ app.get("/health", (_req: Request, res: Response) => {
 // Main complaint analysis route
 app.post("/analyze-ticket", async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // Basic input validation
         if (!req.body || typeof req.body.complaint !== "string") {
             return res.status(400).json({ error: "Missing or invalid complaint in request body" });
         }
@@ -40,6 +46,22 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     res.status(500).json({ error: "Internal server error" });
 });
 
-app.listen(PORT, () => {
-    console.log(`QueueStorm API running on port ${PORT}`);
-});
+// Startup sequence: load sample feed first, then start server
+(async () => {
+    try {
+        console.log("Loading sample feed...");
+        await loadSampleFeed();
+        console.log("Sample feed loaded.");
+        console.log("Startup check:", {
+            PORT,
+            MODEL: process.env.OPENAI_MODEL,
+            KEY: process.env.OPENAI_API_KEY?.slice(0, 8) + "..."
+        });
+        app.listen(PORT, () => {
+            console.log(`QueueStorm API running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error("Startup error:", err);
+        process.exit(1);
+    }
+})();
