@@ -1,0 +1,37 @@
+{
+  "name": "questorm_cha_ndu3",
+  "version": "0.0.1",
+  "description": "My custom readme graphic generator [WIP]\r ## Features",
+  "homepage": "https://github.com/hamzahossain/questorm_cha_ndu3#readme",
+  "bugs": {
+    "url": "https://github.com/hamzahossain/questorm_cha_ndu3/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hamzahossain/questorm_cha_ndu3.git"
+  },
+  "license": "ISC",
+  "author": "hamzahossain",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin-ts": "^4.4.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.62.0",
+    "@typescript-eslint/parser": "^8.62.0",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "prettier": "^3.8.5"
+  }
+}
