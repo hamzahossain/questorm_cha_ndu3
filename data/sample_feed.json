@@ -1,0 +1,198 @@
+[
+    {
+        "input": {
+            "ticket_id": "P001",
+            "complaint": "My payment failed yesterday.",
+            "transaction_history": [
+                {
+                    "id": "TX101",
+                    "type": "payment",
+                    "amount": 500,
+                    "status": "failed"
+                }
+            ]
+        },
+        "output": {
+            "ticket_id": "P001",
+            "relevant_transaction_id": "TX101",
+            "evidence_verdict": "consistent",
+            "case_type": "PaymentFailed",
+            "severity": "High",
+            "department": "PaymentsOps",
+            "agent_summary": "Payment failure detected and matched to transaction TX101.",
+            "recommended_next_action": "Escalate to human review.",
+            "customer_reply": "We have noted your payment issue. Our team will review it shortly.",
+            "human_review_required": true,
+            "confidence": 0.9,
+            "reason_codes": [
+                "matched_status"
+            ]
+        }
+    },
+    {
+        "input": {
+            "ticket_id": "P002",
+            "complaint": "Payment did not go through but money was deducted.",
+            "transaction_history": [
+                {
+                    "id": "TX102",
+                    "type": "payment",
+                    "amount": 750,
+                    "status": "failed"
+                }
+            ]
+        },
+        "output": {
+            "ticket_id": "P002",
+            "relevant_transaction_id": "TX102",
+            "evidence_verdict": "consistent",
+            "case_type": "PaymentFailed",
+            "severity": "Critical",
+            "department": "PaymentsOps",
+            "agent_summary": "Payment deducted but marked failed in transaction TX102.",
+            "recommended_next_action": "Escalate urgently to payments operations.",
+            "customer_reply": "We have recorded your payment issue. Our team will investigate promptly.",
+            "human_review_required": true,
+            "confidence": 0.95,
+            "reason_codes": [
+                "deducted_but_failed"
+            ]
+        }
+    },
+    {
+        "input": {
+            "ticket_id": "R001",
+            "complaint": "আমার টাকা ফেরত আসেনি।",
+            "transaction_history": [
+                {
+                    "id": "TX201",
+                    "type": "refund",
+                    "amount": 1200,
+                    "status": "pending"
+                }
+            ]
+        },
+        "output": {
+            "ticket_id": "R001",
+            "relevant_transaction_id": "TX201",
+            "evidence_verdict": "insufficient_data",
+            "case_type": "RefundRequest",
+            "severity": "Medium",
+            "department": "CustomerSupport",
+            "agent_summary": "Refund request detected but transaction still pending.",
+            "recommended_next_action": "Escalate to human review.",
+            "customer_reply": "আপনার রিফান্ড অনুরোধ আমরা পেয়েছি। আমাদের টিম এটি পর্যালোচনা করবে।",
+            "human_review_required": true,
+            "confidence": 0.6,
+            "reason_codes": [
+                "pending_refund"
+            ]
+        }
+    },
+    {
+        "input": {
+            "ticket_id": "R002",
+            "complaint": "I requested a refund last week but nothing happened.",
+            "transaction_history": [
+                {
+                    "id": "TX202",
+                    "type": "refund",
+                    "amount": 300,
+                    "status": "initiated"
+                }
+            ]
+        },
+        "output": {
+            "ticket_id": "R002",
+            "relevant_transaction_id": "TX202",
+            "evidence_verdict": "consistent",
+            "case_type": "RefundRequest",
+            "severity": "High",
+            "department": "CustomerSupport",
+            "agent_summary": "Refund initiated but not completed for TX202.",
+            "recommended_next_action": "Escalate to support for resolution.",
+            "customer_reply": "We have noted your refund request. Our support team will review it.",
+            "human_review_required": true,
+            "confidence": 0.75,
+            "reason_codes": [
+                "refund_initiated_not_completed"
+            ]
+        }
+    },
+    {
+        "input": {
+            "ticket_id": "F001",
+            "complaint": "I think someone tricked me into sharing my card details.",
+            "transaction_history": []
+        },
+        "output": {
+            "ticket_id": "F001",
+            "relevant_transaction_id": null,
+            "evidence_verdict": "insufficient_data",
+            "case_type": "PhishingOrSocialEngineering",
+            "severity": "Critical",
+            "department": "FraudRisk",
+            "agent_summary": "Possible phishing/social engineering attempt reported.",
+            "recommended_next_action": "Escalate immediately to fraud team.",
+            "customer_reply": "We have received your report. Our fraud team will investigate this matter urgently.",
+            "human_review_required": true,
+            "confidence": 0.8,
+            "reason_codes": [
+                "phishing_report"
+            ]
+        }
+    },
+    {
+        "input": {
+            "ticket_id": "M001",
+            "complaint": "Merchant hasn’t settled my payment yet.",
+            "transaction_history": [
+                {
+                    "id": "TX301",
+                    "type": "settlement",
+                    "amount": 2000,
+                    "status": "delayed"
+                }
+            ]
+        },
+        "output": {
+            "ticket_id": "M001",
+            "relevant_transaction_id": "TX301",
+            "evidence_verdict": "consistent",
+            "case_type": "MerchantSettlementDelay",
+            "severity": "Medium",
+            "department": "MerchantOps",
+            "agent_summary": "Settlement delay detected for merchant transaction TX301.",
+            "recommended_next_action": "Escalate to merchant operations.",
+            "customer_reply": "We have noted the settlement delay. Our merchant operations team will review this.",
+            "human_review_required": true,
+            "confidence": 0.85,
+            "reason_codes": [
+                "settlement_delay"
+            ]
+        }
+    },
+    {
+        "input": {
+            "ticket_id": "O001",
+            "complaint": "I have a general issue not related to payments.",
+            "transaction_history": []
+        },
+        "output": {
+            "ticket_id": "O001",
+            "relevant_transaction_id": null,
+            "evidence_verdict": "insufficient_data",
+            "case_type": "Other",
+            "severity": "Low",
+            "department": "CustomerSupport",
+            "agent_summary": "General issue reported without transaction context.",
+            "recommended_next_action": "Escalate to customer support.",
+            "customer_reply": "Thank you for reaching out. Our support team will review your case.",
+            "human_review_required": true,
+            "confidence": 0.5,
+            "reason_codes": [
+                "general_issue"
+            ]
+        }
+    }
+]

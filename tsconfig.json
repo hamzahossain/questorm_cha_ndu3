@@ -2,22 +2,15 @@
     "compilerOptions": {
         "target": "ESNext",
         "module": "NodeNext",
-        "lib": [
-            "DOM",
-            "ScriptHost",
-            "ES6",
-            "WebWorker",
-            "ES7",
-            "ESNext"
-        ],
+        "lib": ["DOM", "ScriptHost", "ES6", "WebWorker", "ES7", "ESNext"],
         "declaration": true,
         "outDir": "./dist",
+        "rootDir": "./src",
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true
     },
-   
     "exclude": ["node_modules"],
-    "include": ["src/**/*.ts", "src/**/*.graphql"]
+    "include": ["src/**/*.ts"]
 }
