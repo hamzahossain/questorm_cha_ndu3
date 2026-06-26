@@ -20,10 +20,10 @@
     "serve": "npm run build && node dist/index.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "crypto": "^1.0.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "openai": "^6.45.0",
     "typescript": "^6.0.3"
   },
   "devDependencies": {

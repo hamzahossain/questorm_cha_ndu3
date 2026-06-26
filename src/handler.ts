@@ -1,6 +1,6 @@
 import { readFile } from "fs/promises";
 import path from "path";
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import {
     TicketRequest,
     TicketResponse,
@@ -13,22 +13,19 @@ import { validateResponse } from "./validator";
 import { sanitizeResponse } from "./sanitizer";
 import { setCachedResponse, getCachedResponse, makeCacheKey } from "./cache";
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 
-// Lazy client init
-let client: OpenAI | null = null;
-function getClient(): OpenAI {
+let client: GoogleGenerativeAI | null = null;
+function getClient(): GoogleGenerativeAI {
     if (!client) {
-        client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
-        console.log("OpenAI client initialized with model:", MODEL);
+        client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+        console.log("Gemini client initialized with model:", MODEL);
     }
     return client;
 }
 
-// Sample feed cache
 let sampleFeed: any = [];
 
-// Explicit loader function
 export async function loadSampleFeed(): Promise<void> {
     try {
         const sampleFeedPath = path.resolve(process.cwd(), "data/sample_feed.json");
@@ -37,28 +34,43 @@ export async function loadSampleFeed(): Promise<void> {
         console.log("Sample feed loaded successfully.");
     } catch (err) {
         console.error("Failed to load sample_feed.json:", err);
-        sampleFeed = []; // fallback to empty
+        sampleFeed = [];
     }
 }
 
-// Call OpenAI with strict JSON output
-async function callOpenAI(prompt: string): Promise<TicketResponse> {
-    try {
-        const response = await getClient().chat.completions.create({
-            model: MODEL,
-            messages: [{ role: "user", content: prompt }],
-            response_format: { type: "json_object" },
-        });
+// Utility: clean Gemini output before parsing
+function cleanGeminiOutput(raw: string): string {
+    let text = raw.trim();
+    // Strip markdown fences if present
+    if (text.startsWith("```")) {
+        text = text.replace(/```json?/gi, "").replace(/```/g, "").trim();
+    }
+    // Ensure only JSON object remains
+    const firstBrace = text.indexOf("{");
+    const lastBrace = text.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1) {
+        text = text.slice(firstBrace, lastBrace + 1);
+    }
+    return text;
+}
 
-        const raw = response.choices[0].message?.content || "{}";
-        return JSON.parse(raw) as TicketResponse;
+async function callGemini(prompt: string): Promise<TicketResponse> {
+    try {
+        const model = getClient().getGenerativeModel({ model: MODEL });
+        const result = await model.generateContent(prompt);
+        let raw = result.response.text() || "{}";
+        console.log("Raw Gemini output:", raw);
+
+        const cleaned = cleanGeminiOutput(raw);
+        console.log("Cleaned Gemini output:", cleaned);
+
+        return JSON.parse(cleaned) as TicketResponse;
     } catch (err) {
-        console.error("OpenAI call failed:", err);
+        console.error("Gemini call failed:", err);
         throw err;
     }
 }
 
-// Build the full prompt for each request
 function buildPrompt(body: TicketRequest): string {
     return `
 You are QueueStorm Investigator, an AI agent in a hackathon contest.
@@ -74,9 +86,15 @@ CRITICAL RULES:
 - If the complaint is written in Bangla, respond with Bangla in the "customer_reply" field.
 - Always classify into one of the defined CaseType categories.
 - Severity must be chosen based on impact (low, medium, high, critical).
-- Department must route correctly (customer_support, dispute_resolution, payments_ops, merchant_operations, agent_operations, fraud_risk).
+- Department must route correctly:
+  - Fraud → fraud_risk
+  - Dispute → dispute_resolution
+  - Refund/payment issues → payments_ops
+  - Merchant complaints → merchant_operations
+  - Agent complaints → agent_operations
+  - General inquiries → customer_support
 
-### Examples (input → output)
+### Examples
 ${JSON.stringify(sampleFeed, null, 2)}
 
 ### Input
@@ -91,7 +109,6 @@ Return ONLY the JSON object, nothing else.
 `;
 }
 
-// Main analysis function with cache + validation + sanitization
 export async function analyzeWithCache(body: TicketRequest): Promise<TicketResponse> {
     const key = makeCacheKey(body);
 
@@ -104,15 +121,13 @@ export async function analyzeWithCache(body: TicketRequest): Promise<TicketRespo
     let response: TicketResponse;
 
     try {
-        const aiResponse = await callOpenAI(prompt);
+        const aiResponse = await callGemini(prompt);
         response = await sanitizeResponse(aiResponse, body);
 
-        // Validate schema before caching
         validateResponse(response);
         setCachedResponse(key, response);
-    } catch (err) {
+    } catch (err: any) {
         console.error("Handler error:", err);
-        // Fallback: minimal safe response using enums
         response = {
             ticket_id: body.ticket_id || "unknown",
             relevant_transaction_id: null,

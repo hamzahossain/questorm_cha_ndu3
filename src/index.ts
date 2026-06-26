@@ -54,8 +54,8 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
         console.log("Sample feed loaded.");
         console.log("Startup check:", {
             PORT,
-            MODEL: process.env.OPENAI_MODEL,
-            KEY: process.env.OPENAI_API_KEY?.slice(0, 8) + "..."
+            MODEL: process.env.GEMINI_MODEL,
+            KEY: process.env.GEMINI_API_KEY?.slice(0, 8) + "..."
         });
         app.listen(PORT, () => {
             console.log(`QueueStorm API running on port ${PORT}`);

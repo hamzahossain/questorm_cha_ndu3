@@ -9,13 +9,13 @@ responses.
 ## Features
 
 - **Endpoints**
-    - `GET /health` → service health check
-    - `POST /analyze-ticket` → analyze a customer complaint
-- **Strict schema** → enforced via enums in `types.ts`
-- **Guardrails** → sanitizer strips unsafe text (refund promises, PIN/OTP leaks)
-- **Validation** → validator ensures schema correctness
-- **Caching** → deduplicates repeated complaints
-- **Fallbacks** → guarantees safe responses even if AI fails
+    - `GET /health` -> service health check
+    - `POST /analyze-ticket` -> analyze a customer complaint
+- **Strict schema** -> enforced via enums in `types.ts`
+- **Guardrails** -> sanitizer strips unsafe text (refund promises, PIN/OTP leaks)
+- **Validation** -> validator ensures schema correctness
+- **Caching** -> deduplicates repeated complaints
+- **Fallbacks** -> guarantees safe responses even if AI fails
 
 ---
 
@@ -23,19 +23,19 @@ responses.
 
 - Node.js + Express
 - TypeScript
-- OpenAI SDK (`gpt-4o-mini`) (default)
+- Google Gemini SDK (`@google/generative-ai`)
 - In‑memory cache (swappable with Redis)
 
 ---
 
-## ⚙️ Setup
+## Setup
 
-1.Clone the repo:
+1. Clone the repo:
 
-```bash
+    ```bash
     git clone https://github.com/your-org/queuestorm.git
     cd queuestorm
-```
+    ```
 
 2.Install Dependencies:
 
@@ -47,9 +47,10 @@ npm install
 3.Create `.env` file (From env.example):
 
 ```bash
-    OPENAI_MODEL=gpt-4o-mini
-    OPENAI_API_KEY=your_openai_key_here
-    PORT=8000
+GEMINI_MODEL=gemini-1.5-pro
+GEMINI_API_KEY=your_google_ai_studio_key_here
+PORT=8000
+
 ```
 
 4.Run the service:
@@ -85,5 +86,5 @@ npm install
 
 ## Request Flow
 
-Client → **index.ts** → **handler.ts** → (uses **sanitizer.ts**, **validator.ts**, **cache.ts**, **types.ts**,
-**sample_feed.json**) → back to client with a safe `TicketResponse`.
+Client -> **index.ts** -> **handler.ts** -> (uses **sanitizer.ts**, **validator.ts**, **cache.ts**, **types.ts**,
+**sample_feed.json**) -> back to client with a safe `TicketResponse`.
